@@ -15,7 +15,7 @@ permissions:
   packages: write
 
 env:
-  PYTHON_VERSION: "3.13.11"
+  PYTHON_VERSION: "3.13"
   HATCH_VERSION: "1.16.2"
   DOCKER_BUILDX_VERSION: "v0.30.1"
   XP_CHANNEL: stable
