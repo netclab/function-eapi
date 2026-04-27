@@ -30,8 +30,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Hatch
-        run: pipx install hatch==${{ env.HATCH_VERSION }}
-      - run: pip install "virtualenv==20.24.7"
+        run: pip install hatch==${{ env.HATCH_VERSION }} virtualenv==20.24.7
       - name: Lint
         run: hatch fmt
 
