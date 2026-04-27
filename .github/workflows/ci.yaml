@@ -31,7 +31,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Hatch
         run: pipx install hatch==${{ env.HATCH_VERSION }}
-- run: pipx inject hatch "virtualenv<21"
+      - run: pipx inject hatch "virtualenv<21"
       - name: Lint
         run: hatch fmt
 
