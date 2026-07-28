@@ -45,6 +45,12 @@ class FunctionRunner(grpcv1.FunctionRunnerService):
 
         observed_xr = resource.struct_to_dict(req.observed.composite.resource)
         observed_xr_name = observed_xr.get("metadata").get("name")
+        # A namespaced composite may only compose namespaced resources -- for a
+        # cluster scoped Request, Crossplane rejects the whole reconcile with
+        # "cannot apply cluster scoped composed resource ... for a namespaced
+        # composite resource". The composite's own namespace is the only signal
+        # needed to pick the right API group.
+        observed_xr_namespace = observed_xr.get("metadata").get("namespace")
         fqdn = observed_xr["spec"].get("endpoint")
         cmds = observed_xr["spec"].get("cmds")
         remove_container = observed_xr["spec"].get("removeContainer")
@@ -107,7 +113,9 @@ class FunctionRunner(grpcv1.FunctionRunnerService):
                 "isRemovedCheck": removed_logic,
             }
 
-            resource_data = construct_request_resource(name, jsonrpc_ops, jsonrpc_cfg)
+            resource_data = construct_request_resource(
+                name, jsonrpc_ops, jsonrpc_cfg, namespace=observed_xr_namespace
+            )
 
             resource.update(
                 rsp.desired.resources[name],
@@ -201,10 +209,25 @@ def get_envs(environment: dict) -> tuple[int, str, bool]:
     return port, scheme, insecure_skip_tls_verify
 
 
-def construct_request_resource(name: str, ops: dict, config: dict) -> dict:
-    """Construct the resource request for the given data."""
+REQUEST_API_VERSION = "http.crossplane.io/v1alpha2"
+REQUEST_API_VERSION_NAMESPACED = "http.m.crossplane.io/v1alpha2"
+
+
+def construct_request_resource(
+    name: str, ops: dict, config: dict, namespace: str | None = None
+) -> dict:
+    """Construct the resource request for the given data.
+
+    ``namespace`` is the composite's namespace, or None when it is cluster
+    scoped. It selects the API group only: Crossplane places a composed
+    namespaced resource in the composite's namespace by itself, and
+    provider-http defaults ``providerConfigRef`` to the ProviderConfig named
+    ``default`` there -- so neither has to be spelled out here.
+    """
     return {
-        "apiVersion": "http.crossplane.io/v1alpha2",
+        "apiVersion": (
+            REQUEST_API_VERSION_NAMESPACED if namespace else REQUEST_API_VERSION
+        ),
         "kind": "Request",
         "metadata": {
             "name": name,

@@ -169,3 +169,66 @@ class TestFunctionRunner(unittest.IsolatedAsyncioTestCase):
             actions,
             {"CREATE", "UPDATE", "OBSERVE", "REMOVE"},
         )
+
+    async def test_namespaced_composite_gets_namespaced_request(self) -> None:
+        """A namespaced composite composes a namespaced Request.
+
+        Crossplane refuses to apply a cluster scoped composed resource for a
+        namespaced composite, failing the whole reconcile -- so the API group
+        has to follow the composite's scope. The test above covers the cluster
+        scoped case, where the composite carries no namespace.
+        """
+
+        composite = {
+            "apiVersion": "netclab.dev/v1alpha1",
+            "kind": "CliConfig",
+            "metadata": {"name": "eoscommand-1", "namespace": "lab"},
+            "spec": {
+                "endpoint": "ceos01.default.svc.cluster.local",
+                "cmds": {"ip prefix-list PL-Loopback0": {}},
+            },
+        }
+
+        secret = {
+            "apiVersion": "v1",
+            "kind": "Secret",
+            "metadata": {"name": "eos-creds", "namespace": "crossplane-system"},
+            "type": "Opaque",
+            "data": {"basicAuth": "YXJpc3RhOmFyaXN0YQ=="},
+        }
+
+        environment = {
+            "restconf": {"scheme": "https", "port": 6020},
+            "jsonrpc": {"scheme": "http", "port": 6021},
+        }
+
+        req = fnv1.RunFunctionRequest(
+            input=resource.dict_to_struct({"version": "v1beta2"}),
+            observed=fnv1.State(
+                composite=fnv1.Resource(resource=resource.dict_to_struct(composite))
+            ),
+            required_resources={
+                "eos-creds": fnv1.Resources(
+                    items=[fnv1.Resource(resource=resource.dict_to_struct(secret))]
+                )
+            },
+            context=structpb.Struct(
+                fields={
+                    "apiextensions.crossplane.io/environment": structpb.Value(
+                        struct_value=resource.dict_to_struct(environment)
+                    )
+                }
+            ),
+        )
+
+        resp = await fn.FunctionRunner().RunFunction(req, None)
+
+        self.assertGreater(len(resp.desired.resources), 0, "no desired resources")
+        for name, composed in resp.desired.resources.items():
+            result = MessageToDict(composed.resource)
+            self.assertEqual(
+                result["apiVersion"],
+                "http.m.crossplane.io/v1alpha2",
+                f"{name} is not namespaced",
+            )
+            self.assertEqual(result["kind"], "Request")
