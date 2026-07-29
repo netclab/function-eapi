@@ -3,7 +3,7 @@ kind: Function
 metadata:
   name: function-eapi
   annotations:
-    meta.crossplane.io/source: https://github.com/mbakalarski/function-eapi
+    meta.crossplane.io/source: https://github.com/netclab/function-eapi
     meta.crossplane.io/license: Apache-2.0
     meta.crossplane.io/description: Configure Arista EOS devices via JSON-RPC.
     meta.crossplane.io/readme: |
