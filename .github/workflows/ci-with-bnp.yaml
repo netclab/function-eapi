@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - "v*"
+  # Re-run a release whose publish leg failed without moving the tag. Select
+  # the tag as the ref when dispatching; the guard job below rejects a branch.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -11,15 +14,29 @@ permissions:
 
 env:
   PYTHON_VERSION: "3.13"
-  HATCH_VERSION: "1.16.2"
+  HATCH_VERSION: "1.17.1"
   DOCKER_BUILDX_VERSION: "v0.30.1"
   XP_CHANNEL: stable
   XPKG: ghcr.io/${{ github.repository }}
   UP_XPKG: xpkg.upbound.io/netclab/function-eapi
 
 jobs:
+  # The tag is the version this workflow publishes, so a dispatch against a
+  # branch has nothing to release. `push` catches that today, but only after
+  # the arm64 build has already run -- fail here instead.
+  guard:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Refuse a ref that is not a tag
+        if: github.ref_type != 'tag'
+        run: |
+          echo "::error::${{ github.ref_name }} is a ${{ github.ref_type }}, not a tag." \
+               "Dispatch this workflow against a tag."
+          exit 1
+
   lint:
     runs-on: ubuntu-24.04
+    needs: guard
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -32,6 +49,7 @@ jobs:
 
   unit-test:
     runs-on: ubuntu-24.04
+    needs: guard
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
