@@ -28,9 +28,9 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://github.com/mbakalarski/function-eapi#readme"
-Issues = "https://github.com/mbakalarski/function-eapi/issues"
-Source = "https://github.com/mbakalarski/function-eapi"
+Documentation = "https://github.com/netclab/function-eapi#readme"
+Issues = "https://github.com/netclab/function-eapi/issues"
+Source = "https://github.com/netclab/function-eapi"
 
 [project.scripts]
 function = "function.main:cli"
