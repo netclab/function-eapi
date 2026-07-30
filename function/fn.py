@@ -53,7 +53,7 @@ class FunctionRunner(grpcv1.FunctionRunnerService):
         observed_xr_namespace = observed_xr.get("metadata").get("namespace")
         fqdn = observed_xr["spec"].get("endpoint")
         cmds = observed_xr["spec"].get("cmds")
-        remove_container = observed_xr["spec"].get("removeContainer")
+        remove_section = observed_xr["spec"].get("removeSection")
 
         environment = resource.struct_to_dict(
             req.context["apiextensions.crossplane.io/environment"]
@@ -98,7 +98,7 @@ class FunctionRunner(grpcv1.FunctionRunnerService):
                 "cmds": [
                     "enable",
                     "configure",
-                    *build_remove_path(path, remove_container=remove_container),
+                    *build_remove_path(path, remove_section=remove_section),
                 ],
             }
             jsonrpc_remove = request_json("runCmds", params=jsonrpc_remove_params)
@@ -138,12 +138,12 @@ def toggle_no(cmd: str) -> str:
     return cmd.removeprefix("no ") if cmd.startswith("no ") else f"no {cmd}"
 
 
-def build_remove_path(path: list[str], *, remove_container: bool = False) -> list[str]:
+def build_remove_path(path: list[str], *, remove_section: bool = False) -> list[str]:
     """Create cmd for remove op."""
     head, *tail = path
 
-    # remove the container
-    if remove_container and tail:
+    # remove the whole enclosing section, not just the setting inside it
+    if remove_section and tail:
         return [f"no {head}"]
 
     # remove nested items
