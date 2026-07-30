@@ -4,7 +4,7 @@ metadata:
   name: eoscommand-2
 spec:
   endpoint: ceos01.default.svc.cluster.local
-  removeContainer: true
+  removeSection: true
   cmds:
     no spanning-tree vlan-id 4093-4094: {}
     ip prefix-list PL-Loopback0:
