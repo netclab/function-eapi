@@ -15,7 +15,7 @@ permissions:
 env:
   PYTHON_VERSION: "3.13"
   HATCH_VERSION: "1.18.1"
-  DOCKER_BUILDX_VERSION: "v0.30.1"
+  DOCKER_BUILDX_VERSION: "v0.38.1"
   XP_CHANNEL: stable
   XPKG: ghcr.io/${{ github.repository }}
   UP_XPKG: xpkg.upbound.io/netclab/function-eapi
