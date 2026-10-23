@@ -48,6 +48,11 @@ dependencies = ["ipython==9.17.1"]
 [tool.hatch.envs.default.scripts]
 development = "python function/main.py --insecure --debug"
 
+# The runtime's Python, and the next one. No free-threaded build: grpcio has no wheel
+# for it and compiles from source for twenty minutes.
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.13", "3.14"]
+
 # These special environments are used by hatch check code and hatch check fmt.
 [tool.hatch.envs.hatch-check-code]
 dependencies = ["ruff==0.17.2"]
