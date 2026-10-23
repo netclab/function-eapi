@@ -19,7 +19,7 @@ classifiers = [
 
 dependencies = [
   "jsonrpcclient==4.0.3",
-  "crossplane-function-sdk-python==0.11.0",
+  "crossplane-function-sdk-python==0.15.1",
   "click==8.3.1",
   "grpcio==1.76.0",
   "protobuf==6.33.5"
