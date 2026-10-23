@@ -50,11 +50,11 @@ development = "python function/main.py --insecure --debug"
 
 # These special environments are used by hatch check code and hatch check fmt.
 [tool.hatch.envs.hatch-check-code]
-dependencies = ["ruff==0.12.7"]
+dependencies = ["ruff==0.17.2"]
 config-path = "none"           # Disable Hatch's default Ruff config.
 
 [tool.hatch.envs.hatch-check-fmt]
-dependencies = ["ruff==0.12.7"]
+dependencies = ["ruff==0.17.2"]
 config-path = "none"
 
 [tool.ruff]
