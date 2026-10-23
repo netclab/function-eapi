@@ -25,7 +25,7 @@ jobs:
   # branch has nothing to release. `push` catches that today, but only after
   # the arm64 build has already run -- fail here instead.
   guard:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Refuse a ref that is not a tag
         if: github.ref_type != 'tag'
@@ -35,7 +35,7 @@ jobs:
           exit 1
 
   lint:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: guard
     steps:
       - uses: actions/checkout@v7
@@ -50,7 +50,7 @@ jobs:
         run: hatch check fmt
 
   unit-test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: guard
     steps:
       - uses: actions/checkout@v7
@@ -68,7 +68,7 @@ jobs:
   # those packages to GitHub as a build artifact. The push job downloads those
   # artifacts and pushes them as a single multi-platform package. 
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
       - lint
       - unit-test
@@ -130,7 +130,7 @@ jobs:
   # pushes them as a multi-platform package.
   push:
     if: ${{ github.event_name != 'pull_request' }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
       - build
     steps:
