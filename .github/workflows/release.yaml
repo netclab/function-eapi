@@ -1,4 +1,4 @@
-name: CI-with-BnP
+name: Release
 
 on:
   push:
@@ -8,13 +8,17 @@ on:
   # the tag as the ref when dispatching; the guard job below rejects a branch.
   workflow_dispatch:
 
+# Never cancelled: a publish stopped halfway leaves one registry with the version and
+# the other without it.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
-  packages: write
 
 env:
   PYTHON_VERSION: "3.13"
-  HATCH_VERSION: "1.18.1"
   DOCKER_BUILDX_VERSION: "v0.38.1"
   XP_CHANNEL: stable
   XPKG: ghcr.io/${{ github.repository }}
@@ -34,34 +38,9 @@ jobs:
                "Dispatch this workflow against a tag."
           exit 1
 
-  lint:
-    runs-on: ubuntu-26.04
+  test:
     needs: guard
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install Hatch
-        run: pipx install hatch==${{ env.HATCH_VERSION }}
-      - name: Lint
-        run: hatch check code
-      - name: Format
-        run: hatch check fmt
-
-  unit-test:
-    runs-on: ubuntu-26.04
-    needs: guard
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install Hatch
-        run: pipx install hatch==${{ env.HATCH_VERSION }}
-      - name: Run unit tests
-        run: hatch test --all --randomize
-
+    uses: ./.github/workflows/ci.yaml
 
   # We want to build most packages for the amd64 and arm64 architectures. To
   # speed this up we build single-platform packages in parallel. We then upload
@@ -69,9 +48,7 @@ jobs:
   # artifacts and pushes them as a single multi-platform package. 
   build:
     runs-on: ubuntu-26.04
-    needs:
-      - lint
-      - unit-test
+    needs: test
     strategy:
       fail-fast: true
       matrix:
@@ -129,10 +106,12 @@ jobs:
   # This job downloads the single-platform packages built by the build job, and
   # pushes them as a multi-platform package.
   push:
-    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-26.04
     needs:
       - build
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7

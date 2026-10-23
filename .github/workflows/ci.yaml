@@ -1,25 +1,26 @@
 name: CI
 
+# Lint and the tests. Release calls the same workflow, so a version is published only
+# after exactly these checks.
+
 on:
   push:
-    branches:
-      - main
-      - release-*
-    tags-ignore:
-      - "v*"
-  pull_request: {}
-  workflow_dispatch: {}
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+# A fixed name, not github.workflow: called from Release, github.workflow is "Release",
+# and a group equal to the caller's own cancels the caller.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
-  packages: write
 
 env:
   PYTHON_VERSION: "3.13"
   HATCH_VERSION: "1.18.1"
-  DOCKER_BUILDX_VERSION: "v0.38.1"
-  XP_CHANNEL: stable
-  XPKG: ghcr.io/${{ github.repository }}
 
 jobs:
   lint:
