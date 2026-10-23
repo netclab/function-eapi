@@ -4,11 +4,6 @@
   "poetry": {"enabled": false},
   "packageRules": [
     {
-      "matchPackageNames": ["protobuf", "grpcio"],
-      "groupName": "grpc ecosystem",
-      "groupSlug": "grpc-stack"
-    },
-    {
       "matchPackageNames": ["docker/*-action"],
       "groupName": "docker actions"
     }
