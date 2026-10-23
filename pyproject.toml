@@ -48,10 +48,14 @@ dependencies = ["ipython==9.4.0"]
 [tool.hatch.envs.default.scripts]
 development = "python function/main.py --insecure --debug"
 
-# This special environment is used by hatch fmt.
-[tool.hatch.envs.hatch-static-analysis]
+# These special environments are used by hatch check code and hatch check fmt.
+[tool.hatch.envs.hatch-check-code]
 dependencies = ["ruff==0.12.7"]
 config-path = "none"           # Disable Hatch's default Ruff config.
+
+[tool.hatch.envs.hatch-check-fmt]
+dependencies = ["ruff==0.12.7"]
+config-path = "none"
 
 [tool.ruff]
 target-version = "py313"
