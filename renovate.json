@@ -1,17 +1,32 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
+  "extends": ["config:recommended"],
+  "poetry": {"enabled": false},
   "packageRules": [
     {
-      "matchPackageNames": [
-        "protobuf",
-        "grpcio"
-      ],
+      "matchPackageNames": ["protobuf", "grpcio"],
       "groupName": "grpc ecosystem",
-      "groupSlug": "grpc-stack",
-      "automerge": false
+      "groupSlug": "grpc-stack"
+    },
+    {
+      "matchPackageNames": ["docker/*-action"],
+      "groupName": "docker actions"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": ["HATCH_VERSION: \"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""],
+      "datasourceTemplate": "pypi",
+      "depNameTemplate": "hatch"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": ["DOCKER_BUILDX_VERSION: \"(?<currentValue>v\\d+\\.\\d+\\.\\d+)\""],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "docker/buildx"
     }
   ]
 }
