@@ -55,11 +55,11 @@ python = ["3.13", "3.14"]
 
 # These special environments are used by hatch check code and hatch check fmt.
 [tool.hatch.envs.hatch-check-code]
-dependencies = ["ruff==0.17.2"]
+dependencies = ["ruff==0.17.3"]
 config-path = "none"           # Disable Hatch's default Ruff config.
 
 [tool.hatch.envs.hatch-check-fmt]
-dependencies = ["ruff==0.17.2"]
+dependencies = ["ruff==0.17.3"]
 config-path = "none"
 
 [tool.ruff]
