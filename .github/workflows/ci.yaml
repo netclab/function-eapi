@@ -20,7 +20,7 @@ permissions:
 
 env:
   PYTHON_VERSION: "3.13"
-  HATCH_VERSION: "1.18.1"
+  HATCH_VERSION: "1.18.2"
 
 jobs:
   lint:
